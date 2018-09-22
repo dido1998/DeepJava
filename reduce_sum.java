@@ -24,6 +24,8 @@ public class reduce_sum extends superopdef
 			addops[i]=new add(eval[i].arr[0][0],arr.arr[0][i]);
 		}
 		//System.out.println(eval[arr.dim2-1].arr[0][0]);
+		curstruct=new backpropagationstructure<>(this,eval[arr.dim2],null);
+		graph.addtolist(curstruct);
 	}
 
 	public tensorarray forward()
@@ -33,14 +35,13 @@ public class reduce_sum extends superopdef
 			eval[i+1].arr[0][0].data=addops[i].forward().data;
 		}
 		//System.out.println(eval[0].arr);
-		curstruct=new backpropagationstructure<>(this,eval[arr.dim2],null);
-		graph.addtolist(curstruct);
+		
 		return eval[arr.dim2];
 	}
 	public void backward(tensorarray backflow)
 	{
 		//System.out.println(eval[arr.dim2].arr[0][0].grad);
-
+		//System.out.println(backflow);
 		addops[arr.dim2-1].backward(backflow.arr[0][0]);
 		//System.out.println(eval[arr.dim2-1].arr[0][0].grad);
 		for(int i=arr.dim2-2;i>=0;i--)

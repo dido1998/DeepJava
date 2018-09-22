@@ -4,20 +4,21 @@ import basicops.*;
 public class convolution extends superopdef
 {
 	tensorarray3d arr;
-	tensorarray3d filters[];
+	tensorarray filters[];
 	tensorgraph graph;
 	tensorarray3d paddedinputs;
 	tensorarray3d eval;
 	int numfilters;
 	int padding;
 	int filtersize;
-	tensorarray3d back[][][];
+	tensorarray back[][][];
 	tensorarrayops ops;
 	tensorarray3d eval1[][][];
 	backpropagationstructure<convolution> curstruct; 
-	mul_tensorarray3d mulops[][][];
+	dot3d mulops[][][];
+	dot dotops[][][];
 	reduce_sum3d redops[][][];
-	tensorarray3d ipslice[][][];
+	tensorarray ipslice[][];
 	public convolution(tensorarray3d arr,int filtersize,int numfilters,tensorgraph graph,String pad)
 	{
 		padding=0;
@@ -35,73 +36,77 @@ public class convolution extends superopdef
 			paddedinputs=arr;
 		}
 
-
-
+		//System.out.println(filtersize);
 		eval=new tensorarray3d((arr.dim1-filtersize+2*padding)+1,arr.dim2-filtersize+2*padding+1,numfilters,false);
-		back=new tensorarray3d[(arr.dim1-filtersize+2*padding)+1][arr.dim2-filtersize+2*padding+1][numfilters];
-		eval1=new tensorarray3d[numfilters][(arr.dim1-filtersize+2*padding)+1][arr.dim2-filtersize+2*padding+1];
-		ipslice=new tensorarray3d[numfilters][eval.dim1][eval.dim2];
-		filters=new tensorarray3d[numfilters];
+		back=new tensorarray[(arr.dim1-filtersize+2*padding)+1][arr.dim2-filtersize+2*padding+1][numfilters];
+		ipslice=new tensorarray[eval.dim1][eval.dim2];
+		filters=new tensorarray[numfilters];
+
+		//
+		
 		for(int i=0;i<numfilters;i++)
 		{
-			filters[i]=new tensorarray3d(filtersize,filtersize,arr.dim3,true);
+			filters[i]=new tensorarray(1,filtersize*filtersize*arr.dim3,true);
 		}
-		mulops=new mul_tensorarray3d[numfilters][eval.dim1][eval.dim2];
-		redops=new reduce_sum3d[numfilters][eval.dim1][eval.dim2];
-		for(int k=0;k<numfilters;k++)
+		//filters[0].print();
+		dotops=new dot[eval.dim1][eval.dim2][numfilters];
+		for(int i=0;i<=paddedinputs.dim1-filtersize;i++)
 		{
-			for(int i=0;i<=paddedinputs.dim1-filtersize;i++)
+			for(int j=0;j<=paddedinputs.dim2-filtersize;j++)
 			{
-				for(int j=0;j<=paddedinputs.dim2-filtersize;j++)
+				ipslice[i][j]=ops.stretch(ops.getslices(paddedinputs,i,i+filtersize,j,j+filtersize),true);
+				for(int k=0;k<numfilters;k++)
 				{
-					ipslice[k][i][j]=ops.getslices(paddedinputs,i,i+filtersize,j,j+filtersize);
-					back[i][j][k]=new tensorarray3d(1,1,1,eval.trainable);
-					eval1[k][i][j]=new tensorarray3d(filtersize,filtersize,paddedinputs.dim3,paddedinputs.trainable);
-					mulops[k][i][j]=new mul_tensorarray3d(ipslice[k][i][j],filters[k],graph);
-					redops[k][i][j]=new reduce_sum3d(eval1[k][i][j],graph);
+					//[k].print();
+					//System.out.println(k);
+
+					back[i][j][k]=new tensorarray(1,1,eval.trainable);
+					//System.out.println(back[i][j][k]);
+					dotops[i][j][k]=new dot(filters[k],ipslice[i][j],graph);
 				}
 			}
 		}
+
+
 		curstruct=new backpropagationstructure<convolution>(this,null,eval);
 		graph.addtolist(curstruct);
+		
 	}
 
 	public tensorarray3d forwardconv()
 	{
-		for(int k=0;k<numfilters;k++)
+		for(int i=0;i<=paddedinputs.dim1-filtersize;i++)
 		{
-			for(int i=0;i<=paddedinputs.dim1-filtersize;i++)
+			for(int j=0;j<=paddedinputs.dim2-filtersize;j++)
 			{
-				for(int j=0;j<=paddedinputs.dim2-filtersize;j++)
+				for(int k=0;k<numfilters;k++)
 				{
-					eval1[k][i][j].assigntensorarray(mulops[k][i][j].forwardconv());
-					eval.arr[i][j][k].data=redops[k][i][j].forwardconv().arr[0][0][0].data;
+					eval.arr[i][j][k].data=dotops[i][j][k].forward().arr[0][0].data;
 				}
 			}
 		}
+		// System.out.println("hello");
 		return eval;
 	}
 
 	public void backwardconv(tensorarray3d backflow)
 	{
-		//System.out.println(backflow.arr[0][0][0].grad);
-		ops.converttoarraytenorarray3d(backflow,back);
-		//System.out.println(back[0][0][0].arr[0][0][0].grad);
-		for(int k=0;k<numfilters;k++)
+		//System.out.println("bcfgsg");
+		//backflow.print();
+		ops.tensorarray3dtoarrayoftensorarray2d(backflow,back);
+
+		for(int i=0;i<=paddedinputs.dim1-filtersize;i++)
 		{
-			for(int i=0;i<=paddedinputs.dim1-filtersize;i++)
+			for(int j=0;j<=paddedinputs.dim2-filtersize;j++)
 			{
-				for(int j=0;j<=paddedinputs.dim2-filtersize;j++)
+				for(int k=0;k<numfilters;k++)
 				{
-					redops[k][i][j].backwardconv(back[i][j][k]);
-					//System.out.println("hello");
-					mulops[k][i][j].backwardconv(eval1[k][i][j]);
-					
+					//System.out.println(back[i][j][k]);
+					//System.out.println("----------------");	
+					dotops[i][j][k].backward(back[i][j][k]);
 				}
 			}
-		}
-		//System.out.println(ipslice[0][0][0].arr[0][0][0]);
-		//System.out.println(paddedinputs.arr[0][0][0].grad);
+		}		
 		graph.removefromlist(curstruct);
 	}	
 }

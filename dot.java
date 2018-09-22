@@ -60,10 +60,13 @@ public class dot extends superopdef
 			}
 			
 		}
+		curstruct=new backpropagationstructure<>(this,dotproduct,null);
+		graph.addtolist(curstruct);
 	}
 
 	public tensorarray forward()
 	{
+		//System.out.println(this);
 		for(int i=0;i<inputs.dim1;i++)
 		{
 			for(int j=0;j<weights.dim2;j++)
@@ -72,14 +75,13 @@ public class dot extends superopdef
 				redouts[i][j].assigntensorarray(red_ops[i][j].forward());
 			}
 		}
-		dotproduct=op.convertotensorarray(redouts,false);
+		op.convertotensorarray(redouts,dotproduct,false);
 		if(dotproduct.dim1!=inputs.dim1 && dotproduct.dim2!=weights.dim2)
 		{
 			System.out.println("error");
 			System.exit(1);
 		}
-		curstruct=new backpropagationstructure<>(this,dotproduct,null);
-		graph.addtolist(curstruct);
+		
 		//System.out.println(dotproduct);
 		return dotproduct;
 
@@ -89,12 +91,14 @@ public class dot extends superopdef
 	{
 		//System.out.println(dotproduct.arr[0][0].grad);
 		tensorarray opconverted[][]=new tensorarray[inputs.dim1][weights.dim2];
+		//System.out.println(inputs.dim1+" "+weights.dim2);
 		op.converttoarrayoftensorarray(backflow,opconverted,false);
 		for(int i=0;i<inputs.dim1;i++)
 		{
 			for(int j=0;j<weights.dim2;j++)
 			{
 				//System.out.println(backflow.arr[i][j].grad);
+				//System.out.println(opconverted[i][j]);
 				red_ops[i][j].backward(opconverted[i][j]);
 				
 				///System.out.println(mulouts[i][j].arr[0][0].grad);

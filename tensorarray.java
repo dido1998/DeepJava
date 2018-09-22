@@ -26,7 +26,10 @@ public class tensorarray
 		{
 			for (int j=0;j<dim2;j++)
 			{
-				arr[i][j]=new tensor(rand.nextDouble(),trainable);
+				if(rand.nextDouble()<0.5)
+					arr[i][j]=new tensor(rand.nextDouble(),trainable);
+				else
+					arr[i][j]=new tensor(-rand.nextDouble(),trainable);
 				//System.out.println(arr[i][j].data);
 			}
 		}

@@ -46,6 +46,20 @@ public class tensorarray3d
 			}
 		}		
 	}
+	public void print()
+	{
+		for(int i=0;i<dim1;i++)
+		{
+			for(int j=0;j<dim2;j++)
+			{
+				for(int k=0;k<dim3;k++)
+				{
+					System.out.println(arr[i][j][k].data);
+				}
+			}
+		}
+		System.out.println("------------");
+	}
 	public void zeros()
 	{
 		for(int i=0;i<dim1;i++)

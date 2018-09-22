@@ -22,7 +22,6 @@ public class tensorgraph
 	}
 	public void backward()
 	{
-		
 		backpropagationstructure<?> temp=oplist.get(oplist.size()-1);
 		if(temp.ans!=null)
 		{
@@ -51,6 +50,7 @@ public class tensorgraph
 		while(!oplist.isEmpty())
 		{
 			backpropagationstructure<?> curobjectref=oplist.get(oplist.size()-1);
+			//System.out.println(curobjectref);
 			if(curobjectref.ans!=null)
 				curobjectref.ob.backward(curobjectref.ans);
 			else

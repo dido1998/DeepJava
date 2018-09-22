@@ -31,10 +31,13 @@ public class mul_tensorarray3d extends superopdef
 				{
 					for(int k=0;k<arr1.dim3;k++)
 					{
+
 						mulops[i][j][k]=new mul(arr1.arr[i][j][k],arr2.arr[i][j][k]);
 					}
 				}
 			}
+			//System.out.println(arr1.arr[0][0][0].data);
+			//System.out.println(arr2.arr[0][0][0].data);
 		}
 	}
 	public tensorarray3d forwardconv()
@@ -60,11 +63,13 @@ public class mul_tensorarray3d extends superopdef
 			{
 				for(int k=0;k<arr1.dim3;k++)
 				{
+					//System.out.println(arr1.arr);
+					//System.out.println(arr2.arr);
 					mulops[i][j][k].backward(backflow.arr[i][j][k]);
 				}
 			}
 		}
-		System.out.println(arr1.arr[0][0][0].grad);
+			//System.out.println(arr1.arr[0][0][0].grad);
 		graph.removefromlist(curstruct);	
 
 	}

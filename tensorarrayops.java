@@ -30,21 +30,75 @@ public class tensorarrayops
 
 			}
 		}
-
-
-
 	}
-	public tensorarray convertotensorarray(tensorarray ip[][],boolean trainable)
+
+	public tensorarray[] convert3dto2d(tensorarray3d arr)
 	{
-		tensorarray op=new tensorarray(ip[0].length,ip.length,trainable);
+		tensorarray a[]=new tensorarray[arr.dim3];
+		for(int i=0;i<arr.dim3;i++)
+		{
+			a[i]=new tensorarray(arr.dim1,arr.dim2,arr.trainable);
+		}
+		for(int i=0;i<arr.dim3;i++)
+		{
+			for(int j=0;j<arr.dim1;j++)
+			{
+				for(int k=0;k<arr.dim2;k++)
+				{
+					a[i].arr[j][k]=arr.arr[j][k][i];
+				}
+			}
+		}
+		return a;
+	}
+	public tensorarray stretch(tensorarray3d a,boolean rowise)
+	{
+		tensorarray b;
+		if(rowise)
+			b=new tensorarray(a.dim1*a.dim2*a.dim3,1,a.trainable);
+		else
+			 b=new tensorarray(1,a.dim1*a.dim2*a.dim3,a.trainable);
+		int c =0;
+		for(int k=0;k<a.dim3;k++)
+		{
+		for(int i=0;i<a.dim1;i++)
+		{
+			for(int j=0;j<a.dim2;j++)
+			{
+				if(rowise)
+					b.arr[c++][0]=a.arr[i][j][k];
+				else
+					b.arr[0][c++]=a.arr[i][j][k];
+			}
+		}
+		}
+		return b;
+	}
+	public tensorarray3d convert2dto3d(tensorarray a[])
+	{
+		tensorarray3d b=new tensorarray3d(a[0].dim1,a[0].dim2,a.length,a[0].trainable);
+		for(int i=0;i<b.dim1;i++)
+		{
+			for(int j=0;j<b.dim2;j++)
+			{
+				for(int k=0;k<b.dim3;k++)
+				{
+					b.arr[i][j][k]=a[k].arr[i][j];
+				}
+			}
+		}
+		return b;
+	}
+	public void convertotensorarray(tensorarray ip[][],tensorarray b,boolean trainable)
+	{
+		
 		for(int i=0;i<ip[0].length;i++)
 		{
 			for(int j=0;j<ip.length;j++)
 			{
-				op.arr[i][j]=ip[i][j].arr[0][0];
+				b.arr[i][j].data=ip[i][j].arr[0][0].data;
 			}
 		}
-		return op;
 	}
 
 	public void converttoarrayoftensorarray(tensorarray ip,tensorarray op[][],boolean trainable)
@@ -59,14 +113,29 @@ public class tensorarrayops
 			}
 		}
 	}
+	public void tensorarray3dtoarrayoftensorarray2d(tensorarray3d a,tensorarray b[][][])
+	{
+		for(int i=0;i<a.dim1;i++)
+		{
+			for(int j=0;j<a.dim2;j++)
+			{
+				for(int k=0;k<a.dim3;k++)
+				{
+					b[i][j][k].arr[0][0]=a.arr[i][j][k];
+				}
+			}
+		}
+	}
 	public void converttoarraytenorarray3d(tensorarray3d ip,tensorarray3d op[][][])
 	{
+
 		for(int i=0;i<ip.dim1;i++)
 		{
 			for(int j=0;j<ip.dim2;j++)
 			{
 				for(int k=0;k<ip.dim3;k++)
 				{
+					//System.out.println(i+" "+j+" "+" "+k+" "+op[i][j][k]);
 					op[i][j][k].arr[0][0][0]=ip.arr[i][j][k];
 				}
 			}

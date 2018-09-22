@@ -55,7 +55,7 @@ public class reduce_sum3d extends superopdef
 
 			ops[i].backward(eval[i+1].arr[0][0][0]);
 		}
-
+		
 		graph.removefromlist(curstruct);
 	}
 
