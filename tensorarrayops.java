@@ -91,10 +91,10 @@ public class tensorarrayops
 	}
 	public void convertotensorarray(tensorarray ip[][],tensorarray b,boolean trainable)
 	{
-		
-		for(int i=0;i<ip[0].length;i++)
+
+		for(int i=0;i<ip.length;i++)
 		{
-			for(int j=0;j<ip.length;j++)
+			for(int j=0;j<ip[0].length;j++)
 			{
 				b.arr[i][j].data=ip[i][j].arr[0][0].data;
 			}

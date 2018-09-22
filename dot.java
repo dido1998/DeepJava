@@ -75,6 +75,7 @@ public class dot extends superopdef
 				redouts[i][j].assigntensorarray(red_ops[i][j].forward());
 			}
 		}
+
 		op.convertotensorarray(redouts,dotproduct,false);
 		if(dotproduct.dim1!=inputs.dim1 && dotproduct.dim2!=weights.dim2)
 		{
